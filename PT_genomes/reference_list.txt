@@ -1,0 +1,6 @@
+/db/LMP18-H2446.fasta
+/db/SAP18-H9654.fasta
+/db/LMP18-H8393.fasta
+/db/SAP18-6199.fasta
+/db/SAP18-8729.fasta
+/db/SAP18-0432.fasta
