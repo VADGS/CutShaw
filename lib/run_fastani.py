@@ -44,7 +44,6 @@ class FastANI:
     def fastani(self):
         # create output directory
         fastani_out_dir = self.fastani_out_dir
-        db_name = os.path.basename(self.db)
 
         if not os.path.isdir(fastani_out_dir):
             os.makedirs(fastani_out_dir)
@@ -91,20 +90,9 @@ class FastANI:
 
 
 if __name__ == '__main__':
-    def str2bool(v):
-        if v.lower() in ('yes', 'true', 't', 'y', '1'):
-            return True
-        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-            return False
-        else:
-            raise argparse.ArgumentTypeError('Boolean value expected.')
     parser = argparse.ArgumentParser(usage="run_fastani.py <input> [options]")
     parser.add_argument("input", type=str, nargs='?', help="path to dir containing read files")
     parser.add_argument("-o", default="", nargs='?', type=str, help="Name of output_dir")
-    parser.add_argument("-species", nargs='?', type=str2bool, default=True, help="return dictionary of predicted "
-                                                                                 "species (i.e. genus and species of "
-                                                                                 "top fastani hits). default: "
-                                                                                 "-species=True")
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
@@ -121,7 +109,6 @@ if __name__ == '__main__':
     fastani_obj = FastANI(path=path,output_dir=output_dir)
     fastani_obj.fastani()
 
-    # if species:
-    #     fastani_obj.fastani_species()
+
 
 
