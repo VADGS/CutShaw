@@ -86,9 +86,6 @@ class FastANI:
             print("Sample: " + id + " FastANI Hit: " + str(predicted_taxon))
 
 
-
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="run_fastani.py <input> [options]")
     parser.add_argument("input", type=str, nargs='?', help="path to dir containing read files")
