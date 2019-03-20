@@ -11,6 +11,7 @@ import re
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '../..'))
 from CutShaw.core import fileparser
 from CutShaw.core import calldocker
+from CutShaw.lib import run_fastani
 
 
 class CfsanSnp:
@@ -62,6 +63,9 @@ class CfsanSnp:
             if os.path.isdir(self.path + "/AppResults"):
                 self.path = self.output_dir
 
+            fastani_obj = run_fastani.FastANI(path=path, output_dir=output_dir)
+            fastani_reference = fastani_obj.fastani()[1][id]
+
             # create paths for data
             mounting = {self.path: '/datain', cfsansnp_out_dir: '/dataout', self.db: '/db'}
             out_dir = '/dataout/'
@@ -78,14 +82,14 @@ class CfsanSnp:
             if not os.path.islink(cfsan_read_dir + id + "/" + os.path.basename(self.runfiles.reads[read].rev)):
                 os.symlink(rev_read, cfsan_read_dir + id + "/" + os.path.basename(self.runfiles.reads[read].rev))
 
-            reference_genome = "/%s.fasta"%id
+            reference_genome = "/%s"%fastani_reference
             command = "bash -c 'run_snp_pipeline.sh -m soft -o {out_dir}{id} -s {out_dir}cfsan-reads " \
                       "{db}{reference_genome}'".format(out_dir=out_dir,db=db, in_dir=in_dir, id=id,
                                                        reference_genome=reference_genome)
             # call the docker process
             if not os.path.isfile(cfsansnp_result):
                 print("Generating cfsansnp output for sample " + id)
-                calldocker.call("staphb/cfsan-snp-pipeline:2.0.2",command,'/dataout',mounting)
+                 calldocker.call("staphb/cfsan-snp-pipeline:2.0.2",command,'/dataout',mounting)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="run_cfsansnp.py <input> [options]")

@@ -49,6 +49,9 @@ class FastANI:
             os.makedirs(fastani_out_dir)
             print("Directory for fastani output made: ", fastani_out_dir)
 
+        taxons = {}
+        reference_genomes = {}
+
         for read in self.runfiles.reads:
             # get id
             id = self.runfiles.reads[read].id
@@ -78,12 +81,29 @@ class FastANI:
                 #rd = csv.reader(file, delimiter="\t", quotechar='"')
                 for line in file:
                     parts = line.split()
-                    predicted_taxon = str(parts[1:2])
-                    if "SAP18" in predicted_taxon:
-                        predicted_taxon = "Salmonella"
-                    elif "LMP18" in predicted_taxon:
-                        predicted_taxon = "Listeria"
-            print("Sample: " + id + " FastANI Hit: " + str(predicted_taxon))
+                    predicted_taxon = ""
+                    reference_genome = str(os.path.basename(parts[1]))
+                    if "SAP18-0432" in reference_genome:
+                        predicted_taxon = "Salmonella enterica subsp. enterica serover Enteritidis"
+                    elif "SAP18-H9654" in reference_genome:
+                        predicted_taxon = "Salmonella enterica subsp. enterica serover Enteritidis"
+                    elif "SAP18-6199" in reference_genome:
+                        predicted_taxon = "Salmonella enterica subsp. enterica serover Typhimurium"
+                    elif "SAP18-8729" in reference_genome:
+                        predicted_taxon = "Salmonella enterica subsp. enterica serover Newport"
+                    elif "LMP18-H2446" in reference_genome:
+                        predicted_taxon = "Listeria monocytogenes"
+                    elif "LMP18-H8393" in reference_genome:
+                        predicted_taxon = "Listeria monocytogenes"
+                    else:
+                        raise ValueError("Sample %s not identified as a 2018 PT isolate"%id)
+
+            taxons[id] = predicted_taxon
+            reference_genomes[id] = reference_genome
+
+           # print("Sample: " + id + " FastANI Hit: " + str(predicted_taxon))
+
+        return [taxons, reference_genomes]
 
 
 if __name__ == '__main__':

@@ -9,8 +9,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '../..'))
 import argparse
 from CutShaw.core import fileparser
 from CutShaw.core import calldocker
-from CutShaw.lib import mash
-
+from CutShaw.lib import run_fastani
 
 class CGPipeline:
     #class object to contain fastq file information
@@ -60,10 +59,7 @@ class CGPipeline:
                     self.path = self.output_dir
 
                 # get paths to fastq files
-                if self.runfiles.reads[read].paired:
-                    fwd = os.path.abspath(self.runfiles.reads[read].fwd).replace(self.path, "")
-                else:
-                    fastq = os.path.abspath(self.runfiles.reads[read].path).replace(self.path, "")
+                fwd = os.path.abspath(self.runfiles.reads[read].fwd).replace(self.path, "")
 
                 if "R1" in fwd:
                     reads = fwd.replace("R1", "*")
@@ -75,34 +71,19 @@ class CGPipeline:
                 out_dir = '/dataout'
                 in_dir = '/datain'
 
-                if from_mash:
-                    # set expected genome lengths according to mash hits
-                    if 'Salmonella' in mash_species[id] or 'Escherichia' in mash_species[id] \
-                            or 'Shigella' in mash_species[id]:
-                        genome_length = 5.0
-                    elif 'Campylobacter' in mash_species[id]:
-                        genome_length = 1.6
-                    elif 'Listeria' in mash_species[id]:
-                        genome_length = 3.0
-                    elif 'Vibrio' in mash_species[id]:
-                        genome_length = 4.0
-                    else:
-                        genome_length = input("In Mbp, what is the expected genome size of %s?"%(id))
-                        try:
-                            float(genome_length)
-                        except ValueError:
-                            print("A number was not entered")
+                fastani_obj = run_fastani.FastANI(path=path, output_dir=output_dir)
+                fastani_reference = fastani_obj.fastani()[1][id]
+
+                if "LMP18" in fastani_reference:
+                    genome_length = 3.0
+                elif "SAP18" in fastani_reference:
+                    genome_length = 5.0
                 else:
-                    if "LMP18" in id:
-                        genome_length = 3.0
-                    elif "SAP18" in id:
-                        genome_length = 5.0
-                    else:
-                        genome_length = input("In Mbp, what is the expected genome size of %s?" % (id))
-                        try:
-                            float(genome_length)
-                        except ValueError:
-                            print("A number was not entered")
+                    genome_length = input("In Mbp, what is the expected genome size of %s?" % (id))
+                    try:
+                        float(genome_length)
+                    except ValueError:
+                        print("A number was not entered")
 
                 genome_length = float(genome_length)*1000000
                 print("Estimated genome length for isolate %s: " % id + str(int(genome_length)))
@@ -131,7 +112,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="run_cg_pipeline.py <input> [options]")
     parser.add_argument("input", type=str, nargs='?', help="path to dir containing read files")
     parser.add_argument("-o", default="", nargs='?', type=str, help="Name of output_dir")
-    parser.add_argument("-from_mash", nargs='?', type=str2bool, default=True, help="Set expected genome length "
+    parser.add_argument("-from_mash", nargs='?', type=str2bool, default=False, help="Set expected genome length "
                                                                                    "according to MASH species "
                                                                                    "prediction. default: "
                                                                                    "-from_mash=True")
