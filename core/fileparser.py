@@ -68,11 +68,11 @@ class RunFiles:
                         self.reads[id] = self.Fastqs(id)
 
                     #if fastq file is foward reads add path to .fwd
-                    if '_R1' in file or '_1' in file and '.cor.' not in file:
+                    if '_R1' in file or '_1' in file and 'spades' not in root and 'cfsan' not in root:
                         if not self.reads[id].fwd:
                             self.reads[id].fwd = root + '/' + file
                     #if fastq file is reverese reads add path to .rev
-                    elif '_R2' in file or '_2' in file and '.cor.' not in file:
+                    elif '_R2' in file or '_2' in file and 'spades' not in root and 'cfsan' not in root:
                         if not self.reads[id].rev:
                             self.reads[id].rev = root + '/' + file
                     #if fastq file is unpaired or interleaved add path to .path
