@@ -8,12 +8,16 @@ import sys
 import shutil
 import argparse
 import re
+import csv
+import pandas
+import datetime
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '../..'))
 from CutShaw.core import fileparser
 from CutShaw.core import calldocker
+from CutShaw.lib import run_fastani
 
 
-class SeqResults:
+class CutShaw:
     # class object to contain fastq file information
     runfiles = None
     # path to fastq files
@@ -39,17 +43,16 @@ class SeqResults:
 
         self.db=reference_dir
 
-        self.seq_results_out_dir = self.output_dir + "/seq_results_output/"
+        self.cutshaw_out_dir = self.output_dir + "/CutShaw_output/"
 
     def seq_results(self):
         # create output directory
-        seq_results_out_dir = self.seq_results_out_dir
+        cutshaw_out_dir = self.cutshaw_out_dir
         db_name = os.path.basename(self.db)
 
-        if not os.path.isdir(seq_results_out_dir):
-            os.makedirs(seq_results_out_dir)
-            print("Directory for seq_results output made: ", seq_results_out_dir)
-        seq_results_result = "/%s/seq_result.tsv" % (seq_results_out_dir, id)
+        if not os.path.isdir(cutshaw_out_dir):
+            os.makedirs(cutshaw_out_dir)
+            print("Directory for CutShaw output made: ", cutshaw_out_dir)
 
         seq_results = {}
 
@@ -68,15 +71,54 @@ class SeqResults:
 
             seq_results[id] = {"SampleID": id, "IsolateID": fastani_reference, "Genus": fastani_taxon,
                                "Sequencer": "Illumina MiSeq", "Machine": "NA", "FlowCell": "NA", "LibKit": "Nextera XT",
-                               "Chemistry": "NA", "RunDate": "NA", "SequencedBy": None, "SamplesPerRun": 16,
+                               "Chemistry": "NA", "RunDate": "NA", "SequencedBy": "DCLS", "SamplesPerRun": 16,
                                "SeqLength": "NA", "Reads": None, "MeanR1Qual": None, "MeanR2Qual": None,
                                "PercMapped": None, "MeanDepth": None, "CovLT10": None, "SNPs": None, "MeanInsert": None,
                                "NG50": None, "GenomeFraction": None, "Contigs": None, "LengthDelta": None,
                                "UnalignedLength": None, "MostAbundantOrganism": "NA", "Misannotated": None, "Coverage":
                                None}
 
+            # From CG_pipeline grab: number of reads, Mean R1 and R2. and coverage
+            with open("%s/cg_pipeline_output/%s_readMetrics.tsv" % (output_dir, id)) as tsv_file:
+                tsv_reader = list(csv.DictReader(tsv_file, delimiter="\t"))
+
+                for line in tsv_reader:
+                    if any(fwd_format in line["File"] for fwd_format in ["_1.fastq", "_R1.fastq"]):
+                        seq_results[id]["MeanR1Qual"] = line["avgQuality"]
+                        seq_results[id]["Reads"] = float(line["numReads"])
+                        seq_results[id]["est_cvg"] = float(line["coverage"])
+                    if any(rev_format in line["File"] for rev_format in ["_2.fastq", "_R2.fastq"]):
+                        seq_results[id]["MeanR2Qual"] = line["avgQuality"]
+                        seq_results[id]["r2_totalBases"] = line["totalBases"]
+                        seq_results[id]["Reads"] += float(line["numReads"])
+                        seq_results[id]["est_cvg"] += float(line["coverage"])
+            # From Quast grab: GenomeFraction, Contigs, NG50, Unaligned length,
+            with open("%s/quast_output/%s/transposed_report.tsv" %(output_dir, id)) as tsv_file:
+                tsv_reader = list(csv.DictReader(tsv_file, delimiter="\t"))
+
+                seq_results[id]["Contigs"] = (tsv_reader[0]["# contigs (>= 1000 bp)"])
+                seq_results[id]["GenomeFraction"] = float((tsv_reader[0]["Genome fraction (%)"]))
+                seq_results[id]["NG50"] = float((tsv_reader[0]["NG50"]))
+                seq_results[id]["UnalignedLength"] = (tsv_reader[0]["Unaligned length"])
+                seq_results[id]["LengthDelta"] = (float((tsv_reader[0]["Total length"])) -
+                                                  float((tsv_reader[0]["Reference length"])))
 
 
+
+            # From CFSAN-SNP grab: MeanDepth, SNPs, MeanInsert,
+
+        seq_results_out = "%s/seq_results.tsv"%cutshaw_out_dir
+
+
+        # Change data dictionary to dataframe to csv
+        df = pandas.DataFrame(seq_results).T[["SampleID", "IsolateID", "Genus","Sequencer","Machine", "FlowCell", "LibKit",
+                                               "Chemistry", "RunDate", "SequencedBy", "SamplesPerRun", "SeqLength", "Reads",
+                                               "MeanR1Qual", "MeanR2Qual", "PercMapped", "MeanDepth", "CovLT10", "SNPs",
+                                               "MeanInsert", "NG50", "GenomeFraction", "Contigs", "LengthDelta",
+                                               "UnalignedLength", "MostAbundantOrganism", "Misannotated", "Coverage"]]
+        df.to_csv(seq_results_out, sep = '\t', index=False)
+
+        print("Seq results curated. Output saved as %s"%seq_results_out)
 
 
 if __name__ == '__main__':
@@ -96,5 +138,5 @@ if __name__ == '__main__':
     if not output_dir:
         output_dir = os.getcwd()
 
-    cfsansnp_obj = CfsanSnp(path=path,output_dir=output_dir)
-    cfsansnp_obj.cfsansnp()
+    CutShaw_obj = CutShaw(path=path,output_dir=output_dir)
+    CutShaw_obj.seq_results()

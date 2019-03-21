@@ -10,6 +10,7 @@ import glob
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '../..'))
 from CutShaw.core import fileparser
 from CutShaw.core import calldocker
+from CutShaw.lib import run_fastani
 
 
 class Quast:
@@ -20,16 +21,12 @@ class Quast:
     # output directory
     output_dir = None
 
-    def __init__(self, threads=None, runfiles=None, path=None, output_dir = None, extra_params=None):
+    def __init__(self, runfiles=None, path=None, output_dir=None):
+        reference_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))[:-4] + "/PT_genomes"
         if output_dir:
             self.output_dir = os.path.abspath(output_dir)
         else:
             self.output_dir = os.getcwd()
-
-        if threads:
-            self.threads = threads
-        else:
-            self.threads = 1
 
         if not os.path.isdir(self.output_dir):
             os.makedirs(self.output_dir)
@@ -40,10 +37,7 @@ class Quast:
             self.path = path
             self.runfiles = fileparser.RunFiles(self.path, output_dir=output_dir)
 
-        if extra_params:
-            self.extra_params = " ".join(extra_params)
-        else:
-            self.extra_params = ""
+        self.db = reference_dir
 
         self.quast_out_dir = self.output_dir + "/quast_output/"
 
@@ -51,32 +45,43 @@ class Quast:
         # create output directory
         quast_out_dir = self.quast_out_dir
 
-        assembly_files = []
+        if not os.path.isdir(quast_out_dir):
+            os.makedirs(quast_out_dir)
+            print("Directory for Quast output made: ", quast_out_dir)
 
         for read in self.runfiles.reads:
             # get id
             id = self.runfiles.reads[read].id
-            assembly_files.append("/data/spades_output/%s/contigs.fasta" % (id))
-        # change self.path to local dir if path is a basemounted dir
-        if os.path.isdir(self.path + "/AppResults"):
-            self.path = self.output_dir
+            # change self.path to local dir if path is a basemounted dir
+            if os.path.isdir(self.path + "/AppResults"):
+                self.path = self.output_dir
+            print(self.path)
+            fastani_obj = run_fastani.FastANI(path=path, output_dir=output_dir)
+            fastani_reference = fastani_obj.fastani()[1][id]
+            reference_genome = "/%s" % fastani_reference
+
+            assembly = "/spades_output/%s/contigs.fasta" % id
+            quast_results = "%s/%s/"%(quast_out_dir, id)
+            if not os.path.isdir(quast_results):
+                os.makedirs(quast_results)
+
+            # create paths for data
+            mounting = {self.path:'/datain', quast_results:'/dataout', self.db: '/db'}
+            out_dir = '/dataout/'
+            in_dir = '/datain/'
+            db = '/db/'
+
+            command = "bash -c 'quast.py {in_dir}{assembly} -r {db}{reference_genome} -o {out_dir}'".format(
+                assembly=assembly, id=id, out_dir=out_dir, reference_genome=reference_genome, in_dir=in_dir,
+                db=db)
 
 
-        assembly_files = ' '.join(assembly_files)
-        # create paths for data
-        mounting = {self.path: '/data'}
-        out_dir = '/data'
-        in_dir = '/data'
+            # call the docker process
+            #print("Generating Quast assembly metrics")
+            calldocker.call("staphb/quast:5.0.0",command,'/dataout/',mounting)
 
-        command = "bash -c 'quast.py {assembly_files} -o {out_dir}'".format(assembly_files=assembly_files,
-                                                                            out_dir=out_dir + "/quast_output/")
+            #print("Quast assembly metrics saved to: %s"%(quast_out_dir))
 
-
-        # call the docker process
-        #print("Generating Quast assembly metrics")
-        calldocker.call("staphb/quast",command,'/dataout',mounting)
-
-        #print("Quast assembly metrics saved to: %s"%(quast_out_dir))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="run_quast.py <input> [options]")
@@ -96,5 +101,5 @@ if __name__ == '__main__':
     if not output_dir:
         output_dir = os.getcwd()
 
-    quast_obj = Quast(path=path,threads=threads,output_dir=output_dir)
+    quast_obj = Quast(path=path,output_dir=output_dir)
     quast_obj.quast()
