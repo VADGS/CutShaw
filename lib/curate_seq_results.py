@@ -106,7 +106,7 @@ class CutShaw:
             with open("%s/quast_output/%s/transposed_report.tsv" %(output_dir, id)) as tsv_file:
                 tsv_reader = list(csv.DictReader(tsv_file, delimiter="\t"))
 
-                seq_results[id]["Contigs"] = tsv_reader[0]["# contigs (>= 1000 bp)"]
+                seq_results[id]["Contigs"] = tsv_reader[0]["# contigs"]
                 seq_results[id]["GenomeFraction"] = int(round(float((tsv_reader[0]["Genome fraction (%)"]))))
                 seq_results[id]["NG50"] = int((tsv_reader[0]["NG50"]))
                 seq_results[id]["UnalignedLength"] = (tsv_reader[0]["Unaligned length"])
