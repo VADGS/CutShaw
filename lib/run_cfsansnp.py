@@ -45,15 +45,11 @@ class CfsanSnp:
     def cfsansnp(self):
         # create output directory
         cfsansnp_out_dir = self.cfsansnp_out_dir
-        db_name = os.path.basename(self.db)
         cfsan_read_dir = cfsansnp_out_dir + "/cfsan-reads/"
 
         if not os.path.isdir(cfsansnp_out_dir):
             os.makedirs(cfsansnp_out_dir)
             print("Directory for cfsansnp output made: ", cfsansnp_out_dir)
-        if not os.path.isdir(cfsansnp_out_dir):
-            os.makedirs(cfsansnp_out_dir)
-            print("Directory for cfsansnp read dir made: ", cfsan_read_dir)
 
         for read in self.runfiles.reads:
             # get id
@@ -75,6 +71,10 @@ class CfsanSnp:
             fwd_read = "/%s/raw_reads/"%in_dir + os.path.basename(self.runfiles.reads[read].fwd)
             rev_read = "/%s/raw_reads/"%in_dir + os.path.basename(self.runfiles.reads[read].rev)
 
+            if not os.path.isdir(cfsan_read_dir):
+                os.makedirs(cfsan_read_dir)
+                print("Directory for cfsansnp read dir made: ", cfsan_read_dir)
+
             if not os.path.isdir(cfsan_read_dir + id):
                 os.makedirs(cfsan_read_dir + id)
             if not os.path.islink(cfsan_read_dir + id + "/" + os.path.basename(self.runfiles.reads[read].fwd)):
@@ -89,7 +89,10 @@ class CfsanSnp:
             # call the docker process
             if not os.path.isfile(cfsansnp_result):
                 print("Generating cfsansnp output for sample " + id)
-                 calldocker.call("staphb/cfsan-snp-pipeline:2.0.2",command,'/dataout',mounting)
+                calldocker.call("staphb/cfsan-snp-pipeline:2.0.2",command,'/dataout',mounting)
+
+            shutil.rmtree(cfsan_read_dir, ignore_errors=True)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="run_cfsansnp.py <input> [options]")
