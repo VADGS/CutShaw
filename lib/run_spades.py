@@ -28,7 +28,7 @@ class Spades:
         if threads:
             self.threads = threads
         else:
-            self.threads = 1
+            self.threads = 16
 
         if not os.path.isdir(self.output_dir):
             os.makedirs(self.output_dir)
