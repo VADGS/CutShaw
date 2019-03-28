@@ -56,7 +56,7 @@ class Quast:
             if os.path.isdir(self.path + "/AppResults"):
                 self.path = self.output_dir
             print(self.path)
-            fastani_obj = run_fastani.FastANI(path=path, output_dir=output_dir)
+            fastani_obj = run_fastani.FastANI(path=self.path, output_dir=self.output_dir)
             fastani_reference = fastani_obj.fastani()[1][id]
             reference_genome = "/%s" % fastani_reference
 
