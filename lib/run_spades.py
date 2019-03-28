@@ -69,8 +69,6 @@ class Spades:
                 if self.runfiles.reads[read].paired:
                     fwd = os.path.abspath(self.runfiles.reads[read].fwd).replace(self.path, "")
                     rev = os.path.abspath(self.runfiles.reads[read].rev).replace(self.path,"")
-                else:
-                    fastq = os.path.basename(self.runfiles.reads[read].path)
 
                 # create paths for data
                 mounting = {self.path:'/datain',spades_results:'/dataout'}
@@ -81,7 +79,7 @@ class Spades:
                 # TODO write elif to catch single read data
 
                 if self.runfiles.reads[read].paired:
-                    command = "bash -c 'run_spades.py -1 {in_dir}/{fwd} -2 {in_dir}/{rev} -o " \
+                    command = "bash -c 'spades.py -1 {in_dir}/{fwd} -2 {in_dir}/{rev} -o " \
                              "{out_dir}/ -t {threads} {extra_params}'".format(in_dir=in_dir,
                                                                                  spades_results=spades_results,
                                                                                  out_dir=out_dir,
@@ -93,7 +91,9 @@ class Spades:
                 print("Generating SPAdes assembly for sample " + id)
                 calldocker.call("staphb/spades",command,'/dataout',mounting)
 
-            print("SPAdes assembly for isolate %s saved to: %s"%(id,spades_results))
+                print("SPAdes assembly for isolate %s saved to: %s"%(id,spades_results))
+            else:
+                print(f"Assembly for {id} exists at {spades_results}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="mash.py <input> [options]")
