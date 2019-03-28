@@ -56,33 +56,32 @@ class RunFiles:
             basemount_project.copy_reads()
             path = output_dir
 
-
         for root,dirs,files in os.walk(path):
-            #scan path and look for fastq files then gather ids and store in temp lists
+            # scan path and look for fastq files then gather ids and store in temp lists
             for file in files:
-                if '.fastq' in file or '.fastq.gz' in file:
-                    #get id and check if we have seen this id before by adding to id list and creating a new read object
+                if '.fastq' in file or '.fastq.gz' in file and 'spades' not in root and '/cfsansnp_output/' not in root:
+                    # get id and check if we have seen this id before by adding to id list and creating a new read object
                     id = file.split('_')[0]
                     if id not in self.ids:
                         self.ids.append(id)
                         self.reads[id] = self.Fastqs(id)
 
-                    #if fastq file is foward reads add path to .fwd
-                    if '_R1' in file or '_1' in file and 'spades' not in root and 'cfsan' not in root:
+                    # if fastq file is foward reads add path to .fwd
+                    if '_R1' in file or '_1' in file:
                         if not self.reads[id].fwd:
                             self.reads[id].fwd = root + '/' + file
-                    #if fastq file is reverese reads add path to .rev
-                    elif '_R2' in file or '_2' in file and 'spades' not in root and 'cfsan' not in root:
+                    # if fastq file is reverese reads add path to .rev
+                    elif '_R2' in file or '_2' in file:
                         if not self.reads[id].rev:
                             self.reads[id].rev = root + '/' + file
-                    #if fastq file is unpaired or interleaved add path to .path
-                    #TODO consider the impact of this and determine best method
+                    # if fastq file is unpaired or interleaved add path to .path
+                    # TODO consider the impact of this and determine best method
                     else:
                         if not self.reads[id].path:
                             self.reads[id].paired = False
                             self.reads[id].path = root + '/' + file
 
-        #notify user if no fastq files were found
+        # notify user if no fastq files were found
         if len(self.ids) == 0:
             raise ValueError("No fastq files found in " + path)
 
