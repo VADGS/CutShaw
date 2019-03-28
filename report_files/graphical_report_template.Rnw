@@ -9,7 +9,9 @@
 \usepackage[format=hang,font=small,labelfont=bf]{caption}
 \usepackage[dvipsnames]{xcolor}
 
-\title{CutShaw WGS Competency Assessment Graphical Report\protect\\[0.2in]"Title goes here"}
+\title{DCLS WGS Competency Assessment\protect\\CutShaw Report for: \protect\\[0.2in]"Title goes here"}
+\author{Report genereated by Kevin G. Libuit,\protect\\ DCL Bioinformatics Lead Scientist}
+
 
 \begin{document}
 \maketitle
@@ -360,13 +362,13 @@ cat(paste("Of the ", total.isolates, " isolates submitted as part of this exerci
 #-------------------------------
 
 desc <- "The following metrics are under evaluation in this competency assessment (\\textbf{Figs. 1-6}) -\n
-$\\bullet$\\textbf{ Taxonomy} - the accuracy of the taxonomic annotation.\n
-\\textbf{1. Mean depth} - the mean depth of coverage. QC threshold = 20X.\n
-\\textbf{2. Mean insert size} - the mean length of the sequence between the adapters.\n
-\\textbf{3. Mean read quality scores - forward reads (R1)} - QC threshold = Q30.\n
-\\textbf{4. Mean read quality scores - reverse reads (R2)} - QC threshold = Q30.\n
-\\textbf{5. NG50} - A metric describing the distribution of contig lengths.\n
-\\textbf{6. Contigs} - The total number of contigs in the assembly.\n"
+\\textbf{1. Taxonomy} - the accuracy of the taxonomic annotation\n
+\\textbf{2. MeanR1Qual} - mean read quality score of forward reads (R1)\n
+\\textbf{3. MeanR2Qual} - mean read quality score of reverse reads (R2)\n
+\\textbf{4. MeanDepth} - the mean depth of coverage\n
+\\textbf{5. MeanInsert} - the mean distance (bp) between adapters\n
+\\textbf{6. NG50} - A metric describing the distribution of contig lengths\n
+\\textbf{7. Contigs} - The total number of contigs in the assembly\n"
 
 cat(desc)
 @
@@ -468,6 +470,7 @@ print(p)
 desc <- "The following metrics are provided for informational purposes. (\\textbf{Figs. 7-12})\n"
 cat(desc)
 @
+\end{small}
 
 \subsubsection{Read Metrics}
 \begin{small}
