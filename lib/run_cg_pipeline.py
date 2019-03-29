@@ -36,16 +36,11 @@ class CGPipeline:
 
         self.cg_out_dir = self.output_dir + "/cg_pipeline_output/"
 
-    def read_metrics(self, from_mash=True):
+    def read_metrics(self):
         cg_out_dir = self.cg_out_dir
         if not os.path.isdir(cg_out_dir):
             os.makedirs(cg_out_dir)
             print("Directory for CG Pipeline output made: ", cg_out_dir)
-        mash_species = {}
-
-        if from_mash:
-            mash_samples = mash.Mash(path=self.path, output_dir=self.output_dir)
-            mash_species = mash_samples.mash_species()
 
         for read in self.runfiles.reads:
             #get id
@@ -71,7 +66,7 @@ class CGPipeline:
                 out_dir = '/dataout'
                 in_dir = '/datain'
 
-                fastani_obj = run_fastani.FastANI(path=path, output_dir=output_dir)
+                fastani_obj = run_fastani.FastANI(path=self.path, output_dir=self.output_dir)
                 fastani_reference = fastani_obj.fastani()[1][id]
 
                 if "LMP18" in fastani_reference:
@@ -112,10 +107,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="run_cg_pipeline.py <input> [options]")
     parser.add_argument("input", type=str, nargs='?', help="path to dir containing read files")
     parser.add_argument("-o", default="", nargs='?', type=str, help="Name of output_dir")
-    parser.add_argument("-from_mash", nargs='?', type=str2bool, default=False, help="Set expected genome length "
-                                                                                   "according to MASH species "
-                                                                                   "prediction. default: "
-                                                                                   "-from_mash=True")
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
@@ -124,10 +115,9 @@ if __name__ == '__main__':
 
     path = os.path.abspath(args.input)
     output_dir = args.o
-    from_mash = args.from_mash
 
     if not output_dir:
         output_dir = os.getcwd()
 
     CGPipeline_obj = CGPipeline(path=path, output_dir=output_dir)
-    CGPipeline_obj.read_metrics(from_mash=from_mash)
+    CGPipeline_obj.read_metrics()
