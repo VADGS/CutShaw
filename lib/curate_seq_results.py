@@ -17,6 +17,7 @@ from CutShaw.core import calldocker
 from CutShaw.lib import run_fastani
 from CutShaw.lib import run_cfsansnp
 from CutShaw.lib import run_quast
+from CutShaw.lib import run_cg_pipeline
 
 
 class CutShaw:
@@ -89,8 +90,8 @@ class CutShaw:
 
                 # From CG_pipeline grab: number of reads, Mean R1 and R2. and coverage
                 if not os.path.isfile("%s/cg_pipeline_output/%s_readMetrics.tsv" % (output_dir, id)):
-                    CGPipeline_obj = run_cfsansnp.CGPipeline(path=self.path, output_dir=self.output_dir)
-                    CGPipeline_obj.read_metrics(from_mash=from_mash)
+                    CGPipeline_obj = run_cg_pipeline.CGPipeline(path=self.path, output_dir=self.output_dir)
+                    CGPipeline_obj.read_metrics()
 
                 with open("%s/cg_pipeline_output/%s_readMetrics.tsv" % (output_dir, id)) as tsv_file:
                     tsv_reader = list(csv.DictReader(tsv_file, delimiter="\t"))
