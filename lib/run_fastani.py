@@ -103,10 +103,6 @@ class FastANI:
 
             taxons[id] = predicted_taxon
             reference_genomes[id] = reference_genome
-            print("Isolate: %s " %id)
-            print("reference genome: %s"%reference_genome)
-
-           # print("Sample: " + id + " FastANI Hit: " + str(predicted_taxon))
 
         return [taxons, reference_genomes]
 
