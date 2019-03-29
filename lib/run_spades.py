@@ -92,8 +92,7 @@ class Spades:
                 calldocker.call("staphb/spades",command,'/dataout',mounting)
 
                 print("SPAdes assembly for isolate %s saved to: %s"%(id,spades_results))
-            else:
-                print(f"Assembly for {id} exists at {spades_results}")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage="mash.py <input> [options]")
