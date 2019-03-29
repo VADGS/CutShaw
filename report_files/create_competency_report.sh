@@ -106,8 +106,10 @@ fi
 #----------------------------------------------------
 # Insert title into tex report
 #----------------------------------------------------
-
-sed -i['.bak'] "s/\[0.2in\]\"Title goes here\"/\[0.2in\] $title/" $tex_report || true
+echo $title
+title_clean=$(echo $title | sed 's/"//g')
+echo $title_clean
+sed -i['.bak'] "s/\"Title goes here\"/ ${title_clean}/" $tex_report || true
 
 echo "Tex conversion successful." | tee -a $log_file
 
