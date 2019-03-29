@@ -50,7 +50,7 @@ def main():
                       + "/report_files/report_template.Rnw"
     seq_stats = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))[:-4]\
                 + "/report_files/seq_stats.tsv"
-    seq_results = f"{output_dir}/CutShaw_output/seq_results.tsv"
+    seq_results = os.path.abspath(output_dir) + "/CutShaw_output/seq_results.tsv"
 
 
     # Curate seq_results file
@@ -61,7 +61,7 @@ def main():
     # Generate CutShaw report
 
     command = [create_competency_report, "-p", prefix, "-t", f"\"{analyst}\"", "-T", report_template,
-               "-o", f"{output_dir}/CutShaw_output", "-s", seq_results, "-S", seq_stats]
+               "-o", os.path.abspath(output_dir)+ "/CutShaw_output", "-s", seq_results, "-S", seq_stats]
 
     reports_dir = output_dir + "/reports/"
 
@@ -72,6 +72,7 @@ def main():
         print("Directory for WGS reports made:", reports_dir)
 
     if not os.path.isfile(f"{reports_dir}/{CutShaw_report}"):
+        #print(str(command))
         subprocess.call(command)
         copyfile(f"{output_dir}/CutShaw_output/{CutShaw_report}", f"{reports_dir}/{CutShaw_report}")
 
