@@ -84,7 +84,7 @@ class CGPipeline:
                 print("Estimated genome length for isolate %s: " % id + str(int(genome_length)))
 
                 # build command for running run_assembly_readMetrics.pl
-                command = "bash -c 'run_assembly_readMetrics.pl --fast {in_dir}/{reads} -e {genome_length} > " \
+                command = "bash -c 'run_assembly_readMetrics.pl {in_dir}/{reads} -e {genome_length} > " \
                           "{out_dir}/{cgp_result}'".format(in_dir=in_dir,out_dir=out_dir,reads=reads,
                                                            genome_length=genome_length,cgp_result=cgp_result)
 

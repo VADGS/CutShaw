@@ -122,7 +122,7 @@ class CutShaw:
                     seq_results[id]["LengthDelta"] = int(abs(int((tsv_reader[0]["Total length"])) -
                                                       int((tsv_reader[0]["Reference length"]))))
 
-                if seq_results[id]["SampleID"] == seq_results[id]["IsolateID"]:
+                if seq_results[id]["IsolateID"] in seq_results[id]["SampleID"]:
                     seq_results[id]["Misannotated"] = "FALSE"
                 else:
                     seq_results[id]["Misannotated"] = "TRUE"
