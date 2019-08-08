@@ -56,8 +56,8 @@ class CGPipeline:
                 # get paths to fastq files
                 fwd = os.path.abspath(self.runfiles.reads[read].fwd).replace(self.path, "")
 
-                if "R1" in fwd:
-                    reads = fwd.replace("R1", "*")
+                if "_R1" in fwd:
+                    reads = fwd.replace("_R1", "*")
                 else:
                     reads = fwd.replace("_1", "*")
 
